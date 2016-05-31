@@ -133,7 +133,7 @@ int qhy5_timed_move(qhy5_driver *qhy5, int direction, int duration_msec)
 {
 	unsigned int ret;
 	int duration[2] = {-1, -1};
-	int cmd;
+	int cmd = 0x00;
 
 	if (! (direction & (QHY_NORTH | QHY_SOUTH | QHY_EAST | QHY_WEST))) {
 		fprintf(stderr, "No direction specified to qhy5_timed_move\n");
@@ -153,17 +153,17 @@ int qhy5_timed_move(qhy5_driver *qhy5, int direction, int duration_msec)
 		return ctrl_msg(qhy5->handle, 0xc2, cmd, 0, 0, (char *)&ret, sizeof(ret));
 	}
 	if (direction &= QHY_NORTH) {
-		cmd &= 0x20;
+		cmd |= 0x20;
 		duration[1] = duration_msec;
 	} else if (direction &= QHY_SOUTH) {
-		cmd &= 0x40;
+		cmd |= 0x40;
 		duration[1] = duration_msec;
 	}
 	if (direction &= QHY_EAST) {
-		cmd &= 0x10;
+		cmd |= 0x10;
 		duration[0] = duration_msec;
 	} else if (direction &= QHY_WEST) {
-		cmd &= 0x80;
+		cmd |= 0x80;
 		duration[0] = duration_msec;
 	}
 	return ctrl_msg(qhy5->handle, 0x42, cmd, 0, 0, (char *)&duration, sizeof(duration));
@@ -306,7 +306,7 @@ int main (int argc,char **argv)
 	int count = 0;
 	unsigned int gain = 10;
 	unsigned int exposure = 100;
-	char basename[256] = "image";
+	char basename[256] = "image.ppm";
 
 	struct option long_options[] = {
 		{"exposure" ,required_argument, NULL, 'e'},
@@ -339,9 +339,6 @@ int main (int argc,char **argv)
 			break;
 		case 'y':
 			height = strtol(optarg, NULL, 0);
-			break;
-		case 'c':
-			count = strtol(optarg, NULL, 0);
 			break;
 		case 'f':
 			strncpy(basename, optarg, 255);
@@ -379,11 +376,10 @@ int main (int argc,char **argv)
 		qhy5_start_exposure(qhy5, exposure);
 		usleep(exposure * 1000);
 		qhy5_read_exposure(qhy5);
-		strcat(basename,".pgm");
 		write_ppm(qhy5, width, height, basename);
 	}
 	for(i = 0; i < count; i++) {
-		sprintf(image_name, "%s%d.pgm", basename, i);
+		sprintf(image_name, "%s%d.ppm", basename, i);
 		qhy5_start_exposure(qhy5, exposure);
 		usleep(exposure * 1000);
 		qhy5_read_exposure(qhy5);

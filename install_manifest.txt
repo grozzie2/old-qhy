@@ -1,0 +1,5 @@
+/usr/local/bin/indi_qhy_ccd
+/usr/share/indi/indi_qhy.xml
+/lib/firmware/qhy5.hex
+/lib/firmware/qhy5loader.hex
+/etc/udev/rules.d/85-qhy.rules
